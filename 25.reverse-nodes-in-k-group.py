@@ -69,7 +69,7 @@ class Solution:
     def reverseKGroup(self, head: ListNode, k: int) -> ListNode:
         # 指的是全部倒过来的版本,认真读题
         # 时间复杂度: n 为链表长度
-        #     time: O(n+(n/k)(k/2)) = O(n^2)
+        #     time: O(n+(n/k)(k/2)) = O(n)
         #     space: O(k)
         if not head:
             return None
@@ -123,11 +123,61 @@ class Solution:
                 stack.append(pointer)
                 pointer = pointer.next
         return head
+    def reverseKGroup(self, head: ListNode, k: int) -> ListNode:
+        # 继续进行优化, 把空间复杂度降为O(1)
+        # 时间复杂度: n 为链表长度
+        #     time: O((n-n/k)+(n/k)(k)) = O(n)
+        #     space: O(1)
+        if not head:
+            return None
+        if k == 1:
+            return head
+        count = 1
+        start = head
+        start_last = None
+        pointer = head
+        # 不再使用栈
+        # stack = [] # 这里事实上最多要用O(k)的空间，没满足题目要求，但是如何回溯到前一个节点呢？
+        while True:
+            if not pointer:
+                break
+            # print(start.val, pointer.val)
+            if count == k:
+                # 开始内部 reverse
+                reverse_start = pointer
+                reverse_end = start
+                left = start
+                right = start.next
+                while left != reverse_start:
+                    print(left.val, right.val)
+                    # 循环头插
+                    right_next = right.next
+                    right.next = left # 头插
+                    left = right
+                    right = right_next
+                if start_last:
+                    start_last.next = reverse_start
+                else:
+                    head = reverse_start
+                reverse_end.next = right
+                # 结束reverse
+                # 这个方法看起来要比上一个更简洁且没有使用空间, 但慢了1/2, 因为reverse遍历需要O(k)
+
+                count = 1
+                start_last = reverse_end
+                start = reverse_end.next
+                pointer_last = reverse_end
+                pointer = reverse_end.next
+                stack = []
+            else:
+                count += 1
+                pointer = pointer.next
+        return head
 
 
 # @lc code=end
 
 s = Solution()
 l = ListNode([1,2,3,4,5,6,7,8,9])
-res = s.reverseKGroup(l, 4)
+res = s.reverseKGroup(l, 2)
 print(res)
